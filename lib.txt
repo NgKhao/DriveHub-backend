@@ -1,1 +1,3 @@
 composer require firebase/php-jwt
+các gốc có thể dùng php artisan install:api để tạo token xác thực khi dufng api
+https://laravel.com/docs/12.x/routing
