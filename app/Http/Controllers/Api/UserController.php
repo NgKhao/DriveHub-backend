@@ -12,7 +12,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->get('pageSize', 10);
-        $page = $request->get('pageNumber', 0) + 1; // Convert 0-based to 1-based for Laravel
+        $page = $request->get('pageNumber', 0) + 1;
 
         $user = User::paginate($perPage, ['*'], 'page', $page);
 
@@ -22,24 +22,23 @@ class UserController extends Controller
                 'email' => $user->email,
                 'fullName' => $user->name,
                 'numberPhone' => $user->phone,
-                'role' => strtoupper($user->role), // Map to uppercase for frontend
+                'role' => strtolower($user->role),
                 'isActive' => $user->status === 'active',
             ];
         });
 
         return response()->json([
-            'messenger' => 'Users retrieved successfully',
-            'status' => 200,
+            'messenger' => 'Lấy danh sách người dùng thành công',
+            'status' => 'success',
             'detail' => [
                 'content' => $content,
-                'pageNumber' => $user->currentPage() - 1, // Convert back to 0-based for frontend
+                'pageNumber' => $user->currentPage() - 1,
                 'pageSize' => $user->perPage(),
                 'totalElements' => $user->total(),
                 'totalPages' => $user->lastPage(),
                 'first' => $user->onFirstPage(),
                 'last' => $user->onLastPage(),
             ],
-            'instance' => 'UserController',
         ]);
     }
 
@@ -48,10 +47,9 @@ class UserController extends Controller
         // Check if user is admin
         if (!Gate::allows('admin-only')) {
             return response()->json([
-                'messenger' => 'Access denied. Admin privileges required.',
-                'status' => 403,
+                'messenger' => 'Truy cập bị từ chối. Cần quyền quản trị.',
+                'status' => 'error',
                 'detail' => null,
-                'instance' => 'UserController',
             ], 403);
         }
 
@@ -59,36 +57,30 @@ class UserController extends Controller
             'email' => 'required|string|email|unique:users,email',
             'fullName' => 'required|string|max:255',
             'numberPhone' => 'required|string|max:20',
-            'role' => 'required|in:BUYER,SELLER,ADMIN',
+            'role' => 'required|in:buyer,seller,admin',
+            'password' => 'required|string|min:6',
         ]);
-
-        $roleMap = [
-            'BUYER' => 'buyer',
-            'SELLER' => 'seller',
-            'ADMIN' => 'admin',
-        ];
 
         $user = User::create([
             'email' => $validated['email'],
             'name' => $validated['fullName'],
             'phone' => $validated['numberPhone'],
-            'role' => $roleMap[$validated['role']],
+            'role' => strtolower($validated['role']),
             'status' => 'active',
-            'password' => bcrypt('defaultpassword'), // Default password for admin-created users
+            'password' => $validated['password'],
         ]);
 
         return response()->json([
-            'messenger' => 'User created successfully',
-            'status' => 201,
+            'messenger' => 'Tạo người dùng thành công',
+            'status' => 'success',
             'detail' => [
                 'id' => $user->id,
                 'email' => $user->email,
                 'fullName' => $user->name,
                 'numberPhone' => $user->phone,
-                'role' => strtoupper($user->role),
+                'role' => strtolower($user->role),
                 'isActive' => $user->status === 'active',
             ],
-            'instance' => 'UserController',
         ], 201);
     }
 
@@ -97,17 +89,16 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         return response()->json([
-            'messenger' => 'User retrieved successfully',
-            'status' => 200,
+            'messenger' => 'Lấy thông tin người dùng thành công',
+            'status' => 'success',
             'detail' => [
                 'id' => $user->id,
                 'email' => $user->email,
                 'fullName' => $user->name,
                 'numberPhone' => $user->phone,
-                'role' => strtoupper($user->role),
+                'role' => strtolower($user->role),
                 'isActive' => $user->status === 'active',
             ],
-            'instance' => 'UserController',
         ]);
     }
 
@@ -118,15 +109,9 @@ class UserController extends Controller
         $validated = $request->validate([
             'fullName' => 'sometimes|string|max:255',
             'numberPhone' => 'sometimes|string|max:20',
-            'roleName' => 'sometimes|in:BUYER,SELLER,ADMIN',
+            'roleName' => 'sometimes|in:buyer,seller,admin',
             'isActive' => 'sometimes|boolean',
         ]);
-
-        $roleMap = [
-            'BUYER' => 'buyer',
-            'SELLER' => 'seller',
-            'ADMIN' => 'admin',
-        ];
 
         $updateData = [];
         if (isset($validated['fullName'])) {
@@ -136,7 +121,7 @@ class UserController extends Controller
             $updateData['phone'] = $validated['numberPhone'];
         }
         if (isset($validated['roleName'])) {
-            $updateData['role'] = $roleMap[$validated['roleName']];
+            $updateData['role'] = strtolower($validated['roleName']);
         }
         if (isset($validated['isActive'])) {
             $updateData['status'] = $validated['isActive'] ? 'active' : 'inactive';
@@ -145,17 +130,16 @@ class UserController extends Controller
         $user->update($updateData);
 
         return response()->json([
-            'messenger' => 'User updated successfully',
-            'status' => 200,
+            'messenger' => 'Cập nhật người dùng thành công',
+            'status' => 'success',
             'detail' => [
                 'id' => $user->id,
                 'email' => $user->email,
                 'fullName' => $user->name,
                 'numberPhone' => $user->phone,
-                'role' => strtoupper($user->role),
+                'role' => strtolower($user->role),
                 'isActive' => $user->status === 'active',
             ],
-            'instance' => 'UserController',
         ]);
     }
 
@@ -166,20 +150,18 @@ class UserController extends Controller
         // Check if user is admin or deleting their own account
         if (!Gate::allows('admin-only') && auth()->id() != $id) {
             return response()->json([
-                'messenger' => 'Access denied. You can only delete your own account or admin privileges required.',
-                'status' => 403,
+                'messenger' => 'Truy cập bị từ chối. Bạn chỉ có thể xóa tài khoản hoặc cần quyền quản trị.',
+                'status' => 'Error',
                 'detail' => null,
-                'instance' => 'UserController',
             ], 403);
         }
 
         $user->delete();
 
         return response()->json([
-            'messenger' => 'User deleted successfully',
-            'status' => 200,
+            'messenger' => 'Xóa người dùng thành công',
+            'status' => 'success',
             'detail' => null,
-            'instance' => 'UserController',
         ]);
     }
 }

@@ -24,5 +24,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // User CRUD routes
-    Route::apiResource('users', UserController::class);
+    Route::prefix('admin')->group(function () {
+        Route::apiResource('/users', UserController::class);
+});
 });
