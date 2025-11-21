@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
+use function Pest\Laravel\instance;
+
 class AuthController extends Controller
 {
     //
@@ -91,6 +93,72 @@ class AuthController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Đăng xuất thành công!',
+        ], 200);
+    }
+
+    public function profile(Request $request)
+    {
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Thông tin người dùng.',
+            'detail' => [
+                'id' => $request->user()->id,
+                'fullName' => $request->user()->name,
+                'email' => $request->user()->email,
+                'numberPhone' => $request->user()->phone,
+                'role' => $request->user()->role,
+                'status' => $request->user()->status,
+            ]
+        ], 200);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $validated = $request->validate([
+            'fullName' => 'sometimes|string|max:255',
+            'numberPhone' => 'sometimes|nullable|string|max:20',
+        ]);
+
+        $user = $request->user();
+        $user->update([
+            'name' => $validated['fullName'] ?? $user->name,
+            'phone' => $validated['numberPhone'] ?? $user->phone,
+        ]);
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Cập nhật thông tin thành công!',
+            'detail' => [
+                'id' => $user->id,
+                'fullName' => $user->name,
+                'email' => $user->email,
+                'numberPhone' => $user->phone,
+                'role' => $user->role,
+                'isActive' => $user->status === 'active',
+            ],
+        ], 200);
+    }
+
+    public function changePassword(Request $request)
+    {
+        $validated = $request->validate([
+            'password' => 'required|string|min:6',
+            'newPassword' => 'required|string|min:6|different:password',
+        ]);
+        $user = $request->user();
+        if (!Hash::check($validated['password'], $user->password)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Mật khẩu hiện tại không đúng!',
+            ], 400);
+        }
+
+        $user->update([
+            'password' => $validated['newPassword'],
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Đổi mật khẩu thành công!',
         ], 200);
     }
 }
