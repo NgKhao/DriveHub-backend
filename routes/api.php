@@ -27,4 +27,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('admin')->group(function () {
         Route::apiResource('/users', UserController::class);
 });
+    // User routes
+    Route::prefix('user')->group(function () {
+        Route::get('/profile', [AuthController::class, 'profile']);
+        Route::put('/profile', [AuthController::class, 'updateProfile']);
+        Route::put('/change-password', [AuthController::class, 'changePassword']);
+    });
 });
