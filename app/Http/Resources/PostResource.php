@@ -1,0 +1,47 @@
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class PostResource extends JsonResource
+{
+    public function toArray(Request $request): array
+    {
+        $fuelMapping = [
+            'petrol' => 'gasoline',
+            'diesel' => 'diesel',
+            'hybrid' => 'hybrid',
+            'electric' => 'electric',
+        ];
+
+        $images = json_decode($this->images, true);
+        if(!is_array($images)) {
+            $images = [];
+        }
+        return [
+            'postId'        => $this->id,
+            'title'         => $this->title,
+            'description'   => $this->description,
+            'price'         => (float) $this->price,
+            'status'        => strtolower($this->status),  //pending,approved,rejected
+            'location'      => $this->location,
+            'phoneContact'  => $this->phone_contact,
+            'sellerType'    => 'INDIVIDUAL', // BackendCreatePostRequest
+            'images'        => $images,
+            'carDetail'  => [
+                'brand'          => $this->brand,
+                'model'         => $this->model,
+                'year'          => (int) $this->year,
+                'mileage'       => (int) $this->mileage,
+                'transmission'  => $this->transmission,
+                'color'         => $this->color,
+                'condition'     => $this->condition,
+                'fuelType'      => $fuelMapping[$this->fuel_type] ?? $this->fuel_type,
+            ],
+            'createdAt'     => $this->created_at->toISOString(),
+            'updatedAt'     => $this->updated_at->toISOString(),
+        ];
+    }
+}
