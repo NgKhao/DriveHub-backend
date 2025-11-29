@@ -40,7 +40,6 @@ class SellerPostController extends Controller
      */
     public function store(Request $request)
     {
-        //
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
@@ -56,7 +55,7 @@ class SellerPostController extends Controller
             'fuelType' => 'required|in:gasoline,diesel,electric,hybrid',
             'condition' => 'required|in:new,used',
             'images' => 'nullable|array',
-            'images.*' => 'image|mimes:jpeg,png,jpg',
+            'images.*' => 'image|mimes:jpeg,png,jpg|max:5120',
         ]);
 
         // Upload images (nếu có)

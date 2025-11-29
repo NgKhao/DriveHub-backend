@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -31,6 +32,7 @@ class PostResource extends JsonResource
                 'condition'     => $this->condition,
                 'fuelType'      => $this->fuel_type,
             ],
+            'seller' => new UserResource($this->whenLoaded('user')),
             'createdAt'     => $this->created_at->toISOString(),
             'updatedAt'     => $this->updated_at->toISOString(),
         ];
