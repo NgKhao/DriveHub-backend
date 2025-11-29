@@ -2,9 +2,9 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserController;
-use App\Http\Controllers\Api\SellerPostsController;
 use App\Http\Controllers\Api\AdminPostsController;
 use App\Http\Controllers\Api\PublicPostsController;
+use App\Http\Controllers\Api\SellerPostController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -32,13 +32,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     // Seller Posts Routes
-    Route::prefix('seller/posts')->middleware('role:seller')->group(function () {
-        Route::post('/', [SellerPostsController::class, 'store']);
-        Route::put('/{id}', [SellerPostsController::class, 'update']);
-        Route::patch('/{id}', [SellerPostsController::class, 'update']);
-        Route::delete('/{id}', [SellerPostsController::class, 'destroy']);
-        Route::get('/my-cars', [SellerPostsController::class, 'getMyCars']);
-        Route::post('/contact-seller', [SellerPostsController::class, 'contactSeller']);
+    Route::prefix('seller')->middleware('role:seller')->group(function () {
+        Route::apiResource('posts', SellerPostController::class);
+        // Route::post('/', [SellerPostsController::class, 'store']);
+        // Route::put('/{id}', [SellerPostsController::class, 'update']);
+        // Route::patch('/{id}', [SellerPostsController::class, 'update']);
+        // Route::delete('/{id}', [SellerPostsController::class, 'destroy']);
+        // Route::get('/my-cars', [SellerPostsController::class, 'getMyCars']);
+        // Route::post('/contact-seller', [SellerPostsController::class, 'contactSeller']);
     });
 
     // Admin Posts Routes

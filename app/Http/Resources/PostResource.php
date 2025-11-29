@@ -9,15 +9,9 @@ class PostResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        $fuelMapping = [
-            'petrol' => 'gasoline',
-            'diesel' => 'diesel',
-            'hybrid' => 'hybrid',
-            'electric' => 'electric',
-        ];
 
         $images = json_decode($this->images, true);
-        if(!is_array($images)) {
+        if (!is_array($images)) {
             $images = [];
         }
         return [
@@ -25,10 +19,10 @@ class PostResource extends JsonResource
             'title'         => $this->title,
             'description'   => $this->description,
             'price'         => (float) $this->price,
-            'status'        => strtolower($this->status),  //pending,approved,rejected
+            'status'        => $this->status,  //pending,approved,rejected
             'location'      => $this->location,
             'phoneContact'  => $this->phone_contact,
-            'sellerType'    => 'INDIVIDUAL', // BackendCreatePostRequest
+            'sellerType'    => $this->seller_type,
             'images'        => $images,
             'carDetail'  => [
                 'brand'          => $this->brand,
@@ -38,7 +32,7 @@ class PostResource extends JsonResource
                 'transmission'  => $this->transmission,
                 'color'         => $this->color,
                 'condition'     => $this->condition,
-                'fuelType'      => $fuelMapping[$this->fuel_type] ?? $this->fuel_type,
+                'fuelType'      => $this->fuel_type,
             ],
             'createdAt'     => $this->created_at->toISOString(),
             'updatedAt'     => $this->updated_at->toISOString(),
