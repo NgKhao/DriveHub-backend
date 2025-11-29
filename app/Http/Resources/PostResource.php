@@ -10,10 +10,8 @@ class PostResource extends JsonResource
     public function toArray(Request $request): array
     {
 
-        $images = json_decode($this->images, true);
-        if (!is_array($images)) {
-            $images = [];
-        }
+        $images = is_array($this->images) ? $this->images : [];
+
         return [
             'postId'        => $this->id,
             'title'         => $this->title,
@@ -22,7 +20,6 @@ class PostResource extends JsonResource
             'status'        => $this->status,  //pending,approved,rejected
             'location'      => $this->location,
             'phoneContact'  => $this->phone_contact,
-            'sellerType'    => $this->seller_type,
             'images'        => $images,
             'carDetail'  => [
                 'brand'          => $this->brand,

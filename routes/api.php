@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\AdminPostsController;
+use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\PublicPostsController;
 use App\Http\Controllers\Api\SellerPostController;
 use Illuminate\Http\Request;
@@ -34,6 +35,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Seller Posts Routes
     Route::prefix('seller')->middleware('role:seller')->group(function () {
         Route::apiResource('posts', SellerPostController::class);
+
+        //Payment
+        Route::post('/payments/create/{post}', [PaymentController::class, 'create'])->name('payments.create');
         // Route::post('/', [SellerPostsController::class, 'store']);
         // Route::put('/{id}', [SellerPostsController::class, 'update']);
         // Route::patch('/{id}', [SellerPostsController::class, 'update']);
@@ -52,6 +56,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/{id}', [AdminPostsController::class, 'getPostById']);
     });
 });
+
+// Vnpay callback route
+Route::get('/payments/vnpay-return', [PaymentController::class, 'vnpayReturn'])->name('payments.vnpayReturn');
 
 // Public posts routes - accessible without auth
 Route::prefix('posts')->group(function () {

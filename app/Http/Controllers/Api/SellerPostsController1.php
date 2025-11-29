@@ -38,7 +38,6 @@ class SellerPostsController extends Controller
             'condition'    => 'required|in:new,used',
             'images'       => 'nullable|array',
             'images.*'     => 'image|mimes:jpeg,png,jpg|max:5120', // Max 5MB
-            'sellerType'   => 'required|in:individual,agency'
         ]);
 
 
@@ -49,14 +48,13 @@ class SellerPostsController extends Controller
 
             // Tra ve respone
             return response()->json([
-            'message' => 'Bài đăng đã được tạo, vui lòng thanh toán.',
-            'status' => 'success',
-            'detail' => [
-                'post'      => new PostResource($post),
-                //'vnpayUrl'  => $paymentUrl,
-            ],
-            ],201);
-
+                'message' => 'Bài đăng đã được tạo, vui lòng thanh toán.',
+                'status' => 'success',
+                'detail' => [
+                    'post'      => new PostResource($post),
+                    //'vnpayUrl'  => $paymentUrl,
+                ],
+            ], 201);
         } catch (\Exception $e) {
             // Log::error("Post creation failed: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
 
@@ -92,7 +90,7 @@ class SellerPostsController extends Controller
             'images.*'       => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        try{
+        try {
             // Goi Service xu ly cap nhat(check quyen)
             $post = $this->postService->updatePosts($id, $validated, $request->user()->id);
 
@@ -102,7 +100,6 @@ class SellerPostsController extends Controller
                 'status' => 'success',
                 'detail' => new PostResource($post),
             ], 200);
-
         } catch (\Exception $e) {
             // Xu ly Not Found hoac Khong co quyen
             return response()->json([
@@ -114,7 +111,7 @@ class SellerPostsController extends Controller
 
     public function destroy(int $id)
     {
-        try{
+        try {
             $this->postService->deletePost($id, auth()->id());
 
             return response()->json([
@@ -122,8 +119,7 @@ class SellerPostsController extends Controller
                 'status' => 'error',
                 'detail' => null,
             ], 200);
-
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             // Xu ly Not Found hoac Khong co quyen
             return response()->json([
                 'message'   => 'Bài đăng không tồn tại hoặc bạn không có quyền.',
@@ -134,17 +130,16 @@ class SellerPostsController extends Controller
 
     public function showMyCar(int $id)
     {
-        try{
+        try {
             //Lay bai dang
             $post = Post::where('id', $id)
-                        ->where('user_id', auth()->id())
-                        ->firstOrFail();
+                ->where('user_id', auth()->id())
+                ->firstOrFail();
             return response()->json([
                 'message' => 'Chi tiết bài đăng của bạn.',
                 'status' => 'success',
                 'detail' => new PostResource($post),
-        ], 200);
-
+            ], 200);
         } catch (\Exception $e) {
             // Xu ly Not Found hoac Khong co quyen
             return response()->json([
@@ -183,5 +178,4 @@ class SellerPostsController extends Controller
             'detail' => null,
         ], 200);
     }
-
 }

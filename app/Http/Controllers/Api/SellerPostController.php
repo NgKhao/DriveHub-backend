@@ -55,8 +55,8 @@ class SellerPostController extends Controller
             'transmission' => 'required|in:manual,automatic',
             'fuelType' => 'required|in:gasoline,diesel,electric,hybrid',
             'condition' => 'required|in:new,used',
+            'images' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg',
-            'sellerType' => 'required|in:individual,agency'
         ]);
 
         // Upload images (nếu có)
@@ -65,7 +65,7 @@ class SellerPostController extends Controller
             foreach ($request->file('images') as $file) {
                 $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
                 $path = $file->storeAs('posts', $filename, 'public');
-                $imagePaths[] = $path;
+                $imagePaths[] = Storage::url($path);
             }
         }
 
@@ -95,7 +95,7 @@ class SellerPostController extends Controller
                 'status' => 'success',
                 'detail' => [
                     'post' => new PostResource($post),
-                    'vnpayUrl' => null, // Chưa triển khai thanh toán
+                    'paymentUrl' => route('payments.create', $post->id),
                 ],
             ],
             201
@@ -164,8 +164,8 @@ class SellerPostController extends Controller
             'transmission' => 'sometimes|in:manual,automatic',
             'fuelType' => 'sometimes|in:gasoline,diesel,electric,hybrid',
             'condition' => 'sometimes|in:new,used',
+            'images' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg',
-            'sellerType' => 'sometimes|in:individual,agency'
         ]);
 
         // Xử lý upload ảnh mới (nếu có)
@@ -174,7 +174,8 @@ class SellerPostController extends Controller
 
             // Xóa ảnh cũ
             foreach ($post->images as $oldImage) {
-                Storage::disk('public')->delete($oldImage);
+                $path = str_replace('/storage/', '', $oldImage);
+                Storage::disk('public')->delete($path);
             }
 
             $imagePaths = [];
@@ -182,30 +183,30 @@ class SellerPostController extends Controller
             foreach ($request->file('images') as $file) {
                 $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
                 $path = $file->storeAs('posts', $filename, 'public');
-                $imagePaths[] = $path;
+                $imagePaths[] = Storage::url($path);
             }
             $validated['images'] = $imagePaths;
-
-            if (isset($validated['fuelType'])) {
-                $validated['fuel_type'] = $validated['fuelType'];
-                unset($validated['fuelType']);
-            }
-
-            if (isset($validated['phoneContact'])) {
-                $validated['phone_contact'] = $validated['phoneContact'];
-                unset($validated['phoneContact']);
-            }
-
-            $post->update($validated);
-
-            return response()->json([
-                'message' => 'Bài đăng đã được cập nhật.',
-                'status' => 'success',
-                'detail' => [
-                    'post' => new PostResource($post),
-                ],
-            ]);
         }
+
+        if (isset($validated['fuelType'])) {
+            $validated['fuel_type'] = $validated['fuelType'];
+            unset($validated['fuelType']);
+        }
+
+        if (isset($validated['phoneContact'])) {
+            $validated['phone_contact'] = $validated['phoneContact'];
+            unset($validated['phoneContact']);
+        }
+
+        $post->update($validated);
+
+        return response()->json([
+            'message' => 'Bài đăng đã được cập nhật.',
+            'status' => 'success',
+            'detail' => [
+                'post' => new PostResource($post),
+            ],
+        ]);
     }
 
     /**
@@ -222,7 +223,8 @@ class SellerPostController extends Controller
         }
         // Xóa ảnh vật lý khi xóa bài đăng
         foreach ($post->images as $image) {
-            Storage::disk('public')->delete($image);
+            $path = str_replace('/storage/', '', $image);
+            Storage::disk('public')->delete($path);
         }
 
         $post->delete();
