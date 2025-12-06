@@ -165,25 +165,52 @@ class SellerPostController extends Controller
             'condition' => 'sometimes|in:new,used',
             'images' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg',
+            'existingImageUrls' => 'sometimes|string', // JSON string of URLs to keep
         ]);
 
-        // Xử lý upload ảnh mới (nếu có)
-        $imagePaths = $post->images ?? [];
-        if ($request->hasFile('images')) {
+        // Xử lý ảnh: giữ ảnh cũ được chỉ định + thêm ảnh mới
+        $imagePaths = [];
 
-            // Xóa ảnh cũ
-            foreach ($post->images as $oldImage) {
+        // Lấy danh sách ảnh cũ cần giữ lại
+        if ($request->has('existingImageUrls')) {
+            $existingUrls = json_decode($request->input('existingImageUrls'), true);
+            if (is_array($existingUrls)) {
+                // Normalize URLs: bỏ domain nếu có (chỉ giữ /storage/...)
+                $imagePaths = array_map(function($url) {
+                    // Decode URL trước khi xử lý
+                    $decodedUrl = urldecode($url);
+
+                    // Nếu URL có domain, chỉ lấy phần path
+                    if (strpos($decodedUrl, 'http://') === 0 || strpos($decodedUrl, 'https://') === 0) {
+                        $parsed = parse_url($decodedUrl);
+                        return $parsed['path'] ?? $decodedUrl;
+                    }
+                    return $decodedUrl;
+                }, $existingUrls);
+            }
+        }
+
+        // Xóa các ảnh cũ KHÔNG được giữ lại
+        $oldImages = $post->images ?? [];
+        foreach ($oldImages as $oldImage) {
+            if (!in_array($oldImage, $imagePaths)) {
+                // Ảnh này không được giữ lại, xóa khỏi storage
                 $path = str_replace('/storage/', '', $oldImage);
                 Storage::disk('public')->delete($path);
             }
+        }
 
-            $imagePaths = [];
-            // Upload ảnh mới
+        // Upload và thêm ảnh mới
+        if ($request->hasFile('images')) {
             foreach ($request->file('images') as $file) {
                 $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
                 $path = $file->storeAs('posts', $filename, 'public');
                 $imagePaths[] = Storage::url($path);
             }
+        }
+
+        // Cập nhật danh sách ảnh nếu có thay đổi
+        if ($request->hasFile('images') || $request->has('existingImageUrls')) {
             $validated['images'] = $imagePaths;
         }
 
