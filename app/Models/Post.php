@@ -52,11 +52,6 @@ class Post extends Model
         return $this->hasOne(Payment::class);
     }
 
-    public function reviews(): HasMany
-    {
-        return $this->hasMany(Review::class);
-    }
-
     public function favorites(): HasMany
     {
         return $this->hasMany(Favorite::class);
@@ -66,4 +61,5 @@ class Post extends Model
     {
         return $this->hasMany(Report::class);
     }
+
 }

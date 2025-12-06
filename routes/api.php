@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\AdminPostsController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\PublicPostController;
 use App\Http\Controllers\Api\PublicPostsController;
+use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\SellerPostController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -34,12 +35,17 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::apiResource('/users', UserController::class);
     });
 
+    Route::middleware('role:buyer')->group(function () {
+        Route::post('sellers/{sellerId}/reviews', [ReviewController::class, 'store']);
+    });
+
     // Seller Posts Routes
     Route::prefix('seller')->middleware('role:seller')->group(function () {
         Route::apiResource('posts', SellerPostController::class);
 
         //Payment
         Route::post('/payments/create/{post}', [PaymentController::class, 'create'])->name('payments.create');
+
     });
 
     // Admin Posts Routes
@@ -69,3 +75,5 @@ Route::prefix('posts')->group(function () {
     Route::get('/', [PublicPostController::class, 'index']);
     Route::get('/{post}', [PublicPostController::class, 'show']);
 });
+
+Route::get('sellers/{sellerId}/reviews', [ReviewController::class, 'index']);
