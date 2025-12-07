@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\SellerPostsController;
 use App\Http\Controllers\Api\AdminPostsController;
@@ -50,6 +51,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/', [AdminPostsController::class, 'getAllPosts']);
         Route::get('/{id}', [AdminPostsController::class, 'getPostById']);
     });
+
+    // Favorites Routes
+    Route::apiResource('favorites', FavoriteController::class)
+        ->parameters(['favorites' => 'postId']);
+
 });
 
 // Public posts routes - accessible without auth
