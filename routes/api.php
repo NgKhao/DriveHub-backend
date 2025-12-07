@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AdminPostController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\AdminPostsController;
 use App\Http\Controllers\Api\PaymentController;
@@ -54,6 +55,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Route::get('/', [AdminPostsController::class, 'getAllPosts']);
         // Route::get('/{id}', [AdminPostsController::class, 'getPostById']);
     });
+
+    // Favorites Routes
+    Route::apiResource('favorites', FavoriteController::class)
+        ->parameters(['favorites' => 'postId']);
+
 });
 
 // Vnpay callback route
