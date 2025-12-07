@@ -13,7 +13,7 @@ class RoleMiddleware
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next, string $role): Response
+    public function handle(Request $request, Closure $next, string ...$roles): Response
     {
         // Kiểm tra role của người dùng có authenticated chưa
         if (!$request->user()) {
@@ -23,10 +23,10 @@ class RoleMiddleware
             ], 401);
         }
 
-        // Kiểm tra role của người dùng
-        if ($request->user()->role !== $role) {
+        // Nếu user có 1 trong các role được phép
+        if (!in_array($request->user()->role, $roles)) {
             return response()->json([
-                'message' => 'Unauthorized. Required role: ' . $role,
+                'message' => 'Forbidden. Allowed roles: ' . implode(', ', $roles),
                 'status' => 'error'
             ], 403);
         }
