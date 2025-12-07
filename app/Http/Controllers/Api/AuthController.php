@@ -133,7 +133,7 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'numberPhone' => $user->phone,
                 'role' => $user->role,
-                'isActive' => $user->status === 'active',
+                'status' => $user->status,
             ],
         ], 200);
     }
