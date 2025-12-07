@@ -25,6 +25,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Auth routes
     Route::prefix('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('/profile', [AuthController::class, 'profile']);
     });
 
     // User CRUD routes for admin
@@ -32,6 +33,19 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::apiResource('/users', UserController::class);
     });
 
+<<<<<<< Updated upstream
+=======
+    // User profile routes
+    Route::prefix('user')->group(function () {
+        Route::put('/profile', [AuthController::class, 'updateProfile']);
+        Route::put('/change-password', [AuthController::class, 'changePassword']);
+    });
+
+    Route::middleware('role:buyer')->group(function () {
+        Route::post('sellers/{sellerId}/reviews', [ReviewController::class, 'store']);
+    });
+
+>>>>>>> Stashed changes
     // Seller Posts Routes
     Route::prefix('seller/posts')->middleware('role:seller')->group(function () {
         Route::post('/', [SellerPostsController::class, 'store']);
