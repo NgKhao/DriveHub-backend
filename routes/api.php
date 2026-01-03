@@ -97,11 +97,7 @@ Route::get('/payments/vnpay-return', [PaymentController::class, 'vnpayReturn'])-
 
 // Public posts routes - accessible without auth
 Route::prefix('posts')->group(function () {
-    // Route::get('/search', [PublicPostsController::class, 'search']);
-    // Route::get('/featured', [PublicPostsController::class, 'getFeatured']);
-    // Route::get('/brands', [PublicPostsController::class, 'getBrands']);
-    // Route::get('/models', [PublicPostsController::class, 'getModels']);
-    // Route::get('/seller/{sellerId}', [PublicPostsController::class, 'getBySeller']);
+    Route::get('/search', [PublicPostController::class, 'search']);
     Route::get('/', [PublicPostController::class, 'index']);
     Route::get('/{post}', [PublicPostController::class, 'show']);
 });
