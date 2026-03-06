@@ -11,11 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::dropIfExists('reports');
         Schema::create('reports', function (Blueprint $table) {
             $table->id();
             $table->foreignId('reporter_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('reported_user_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('post_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('post_id')->nullable()->constrained();
             $table->string('reason');
             $table->text('description')->nullable();
             $table->enum('status', ['pending', 'reviewed', 'resolved', 'dismissed'])->default('pending');
