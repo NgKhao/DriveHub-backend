@@ -30,6 +30,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Auth routes
     Route::prefix('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('/profile', [AuthController::class, 'profile']);
     });
 
     // User CRUD routes for admin
